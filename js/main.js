@@ -120,14 +120,17 @@ function playIntro() {
   const tl = gsap.timeline({ onComplete: finish });
   state.intro = tl;
 
-  // drive the master progress through the six shots
+  // Drive the master progress through the eight shots. The pacing is
+  // deliberate: the mechanical assembly and the flythrough need room to
+  // read. Non-linear easing gives the exploded view a calm beat before
+  // the assembly, and a gentle settle into the hero lock.
   tl.to(proxy, {
-    p: 1, duration: 9.6, ease: 'none',
+    p: 1, duration: 20.5, ease: 'power1.inOut',
     onUpdate: () => state.exp.setProgress(proxy.p),
   });
 
-  // title cards appear during the aerial → lock shots
-  tl.add(() => { if (titles) titles.classList.add('on'); }, 6.6);
+  // title cards fade in over the drone flythrough → hero lock
+  tl.add(() => { if (titles) titles.classList.add('on'); }, 16.2);
 }
 
 /* ============================================================

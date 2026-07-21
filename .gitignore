@@ -1,0 +1,12 @@
+# dependencies / tooling artifacts (libraries are vendored under js/vendor)
+node_modules/
+package.json
+package-lock.json
+
+# local verification scratch
+scratch_test.mjs
+scratch_shots/
+
+# os / editor
+.DS_Store
+*.log

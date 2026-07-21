@@ -158,7 +158,8 @@ body.no-webgl #hero{background:radial-gradient(135% 105% at 72% 16%,#FFFFFF 0%,#
 .hero__scrim{position:absolute;inset:0;z-index:1;pointer-events:none;}
 .hero__scrim::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(237,241,245,0.94) 0%,rgba(237,241,245,0.55) 44%,transparent 74%);}
 .hero__scrim::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,var(--bg) 0%,transparent 26%);}
-.hero__grid{position:relative;z-index:3;max-width:var(--maxw);width:100%;margin:0 auto;padding:0 var(--pad-x);display:grid;grid-template-columns:1.15fr 0.85fr;gap:40px;align-items:center;}
+.hero__grid{position:relative;z-index:3;max-width:var(--maxw);width:100%;margin:0 auto;padding:0 var(--pad-x);display:block;}
+.hero__grid > div{max-width:760px;}
 .hero__tag{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--accent-deep);text-transform:uppercase;margin-bottom:32px;}
 .hero__tag .tick{width:26px;height:1px;background:var(--accent-deep);display:inline-block;}
 .hero h1{font-family:var(--disp);font-stretch:118%;font-weight:800;font-size:clamp(40px,6vw,86px);line-height:0.98;letter-spacing:-1.5px;margin:0 0 26px;text-wrap:balance;color:var(--ink);}

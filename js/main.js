@@ -188,9 +188,10 @@ function setupScroll(noWebgl) {
         gsap.set(heroText, { opacity: 1 - s * 1.1, y: -s * 40 });
       },
     });
-    // stop rendering once the scene is fully scrolled away (battery)
+    // keep rendering while the scene is still (partly) visible behind the
+    // fading hero, then suspend once content fully covers it (battery)
     ScrollTrigger.create({
-      trigger: '#system', start: 'top 80%',
+      trigger: '#system', start: 'top 35%',
       onEnter: () => state.exp && state.exp.setVisible(false),
       onLeaveBack: () => state.exp && state.exp.setVisible(true),
     });

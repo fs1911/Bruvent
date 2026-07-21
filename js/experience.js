@@ -27,7 +27,7 @@ const win=(x,a,b)=>smooth((x-a)/(b-a));
 const easeInOut=(t)=>{t=clamp(t,0,1);return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};
 
 /* radial city geometry */
-const CX=0, CZ=-200, ROUT=158, RAYS=12, RINGS=[44,90,134], PLAZA=13;
+const CX=0, CZ=-240, ROUT=150, RAYS=12, RINGS=[42,84,126], PLAZA=0.5;
 const rayAng=(k)=>k*(Math.PI*2/RAYS);
 const rayDir=(k)=>[Math.cos(rayAng(k)),Math.sin(rayAng(k))];
 
@@ -72,8 +72,8 @@ export default class Experience {
     const ground=new THREE.Mesh(new THREE.PlaneGeometry(2000,2000),new THREE.MeshStandardMaterial({color:COL.land,roughness:0.98,metalness:0}));
     ground.rotation.x=-Math.PI/2;if(this.tier==='high')ground.receiveShadow=true;this.scene.add(ground);
     // water the bridge spans
-    const water=new THREE.Mesh(new THREE.PlaneGeometry(600,86),new THREE.MeshStandardMaterial({color:COL.water,roughness:0.22,metalness:0.15,transparent:true,opacity:0.92}));
-    water.rotation.x=-Math.PI/2;water.position.set(0,0.02,-30);this.scene.add(water);this._water=water;
+    const water=new THREE.Mesh(new THREE.PlaneGeometry(600,94),new THREE.MeshStandardMaterial({color:COL.water,roughness:0.22,metalness:0.15,transparent:true,opacity:0.92}));
+    water.rotation.x=-Math.PI/2;water.position.set(0,0.02,-33);this.scene.add(water);this._water=water;
   }
   _materials(){
     const M=(c,r,m)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
@@ -98,8 +98,8 @@ export default class Experience {
     // deck segments (overlaps girders → flowing)
     this.deckSegs=[];for(let i=0;i<segN;i++){const z=zNear-segLen*(i+0.5);const g=new THREE.Group();const slab=cast(new THREE.Mesh(new THREE.BoxGeometry(deckW,0.6,segLen*0.98),this.mat.deck));g.add(slab);const lane=new THREE.Mesh(new THREE.BoxGeometry(0.35,0.05,segLen*0.55),new THREE.MeshStandardMaterial({color:0xeef2f4,roughness:0.6,metalness:0}));lane.position.y=0.32;g.add(lane);const[t0,t1]=at(0.28+(i/segN)*0.40,0.07);this._addPart(g,v(0,deckY,z),e(0,0,0),v(0,80+i*3,8),e(0.14,0,(i%2?1:-1)*0.1),t0,t1);this.deckSegs.push(g);}
     // ramps → flush with land / city road
-    this._addRamp(v(0,deckY-0.1,zNear+0.5),v(0,0.32,zNear+16),deckW,...at(0.30,0.08));
-    this._addRamp(v(0,deckY-0.1,zFar-0.5),v(0,0.32,zFar-16),deckW,...at(0.60,0.08));
+    this._addRamp(v(0,deckY-0.1,zNear+0.5),v(0,0.18,zNear+18),deckW,...at(0.30,0.08));
+    this._addRamp(v(0,deckY-0.1,zFar-0.5),v(0,0.18,zFar-22),deckW,...at(0.60,0.08)); // gentle descent, lands on the boulevard
     // rails (continuous after deck)
     const railN=10;for(let i=0;i<railN;i++){const rz=zNear-(i+0.5)*(span/railN);for(const sx of[-1,1]){const rail=cast(new THREE.Mesh(new THREE.BoxGeometry(0.28,0.7,span/railN*0.96),this.mat.steel));const[t0,t1]=at(0.52+(i/railN)*0.20,0.06);this._addPart(rail,v(sx*(deckW/2-0.2),deckY+0.7,rz),e(0,0,0),v(sx*120,0,0),e(0,0,0),t0,t1);}}
     // towers
@@ -125,8 +125,8 @@ export default class Experience {
     for(let k=0;k<RAYS;k++){const[dx,dz]=rayDir(k);const inner=[CX+dx*PLAZA,CZ+dz*PLAZA],outer=[CX+dx*ROUT,CZ+dz*ROUT];const mid=[(inner[0]+outer[0])/2,(inner[1]+outer[1])/2];const len=Math.hypot(outer[0]-inner[0],outer[1]-inner[1]);const road=new THREE.Mesh(new THREE.BoxGeometry(3.6,0.18,len),roadMat());road.position.set(mid[0],0.09,mid[1]);road.rotation.y=-Math.atan2(dz,dx)+Math.PI/2;this.city.add(road);this.roadMats.push(road.material);}
     // ring roads
     for(const r of RINGS){const ring=new THREE.Mesh(new THREE.RingGeometry(r-1.4,r+1.4,72),roadMat());ring.rotation.x=-Math.PI/2;ring.position.set(CX,0.085,CZ);this.city.add(ring);this.roadMats.push(ring.material);}
-    // link road from the bridge to the city edge (continues the deck axis)
-    const link=new THREE.Mesh(new THREE.BoxGeometry(9,0.2,120),roadMat());link.position.set(0,0.11,-108);this.city.add(link);this.roadMats.push(link.material);
+    // grand boulevard: the bridge ramp lands here and runs straight to the centre
+    const link=new THREE.Mesh(new THREE.BoxGeometry(9,0.2,158),roadMat());link.position.set(0,0.11,-161);this.city.add(link);this.roadMats.push(link.material);
 
     // buildings in the radial sectors (Paris blocks)
     const maxCount=this.tier==='low'?360:this.tier==='mid'?780:1400;
@@ -139,8 +139,8 @@ export default class Experience {
       // avoid ring roads
       let onRing=false;for(const rr of RINGS){if(Math.abs(r-rr)<3.2){onRing=true;break;}}if(onRing)continue;
       const x=CX+Math.cos(a)*r, z=CZ+Math.sin(a)*r;
-      // keep the bridge/link corridor clear
-      if(Math.abs(x)<6 && z>-90)continue;
+      // keep the bridge/boulevard corridor clear
+      if(Math.abs(x)<6 && z>-95)continue;
       const w=2+Math.random()*2.6, d=2+Math.random()*2.6;
       const h=3+(1-r/ROUT)*13+Math.random()*5;
       raw.push({x,z,w,d,h,rot:a,delay:clamp(r/ROUT,0,1)*0.45});
@@ -182,14 +182,15 @@ export default class Experience {
     for(let k=0;k<RAYS;k++){const[dx,dz]=rayDir(k);seg(CX+dx*PLAZA,CZ+dz*PLAZA,CX+dx*ROUT,CZ+dz*ROUT,PLAZA/ROUT,1);}
     // rings (constant radius)
     for(const rr of RINGS){const rn=rr/ROUT;const nSeg=64;for(let i=0;i<nSeg;i++){const a1=i/nSeg*Math.PI*2,a2=(i+1)/nSeg*Math.PI*2;seg(CX+Math.cos(a1)*rr,CZ+Math.sin(a1)*rr,CX+Math.cos(a2)*rr,CZ+Math.sin(a2)*rr,rn,rn);}}
-    // spur from the bridge into the étoile (also converges to centre)
-    seg(0,-70,CX+rayDir(3)[0]*ROUT,CZ+rayDir(3)[1]*ROUT,1.02,1);
+    // spur from the bridge into the étoile (continues down to the centre)
+    seg(0,-70,CX+rayDir(3)[0]*ROUT,CZ+rayDir(3)[1]*ROUT,1.13,1);
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('aR',new THREE.Float32BufferAttribute(aR,1));
     this.snetMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,
-      uniforms:{uFront:{value:0},uColor:{value:new THREE.Color(COL.accent)},uTip:{value:new THREE.Color(0xffffff)}},
+      uniforms:{uFront:{value:0},uFill:{value:0},uColor:{value:new THREE.Color(0x0c93a6)},uTip:{value:new THREE.Color(0x7ff2ff)}},
       vertexShader:`attribute float aR; varying float vR; void main(){ vR=aR; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
-      fragmentShader:`uniform float uFront; uniform vec3 uColor; uniform vec3 uTip; varying float vR;
-        void main(){ float edge=1.0-uFront; float on=step(edge,vR); float tip=on*(1.0-smoothstep(edge,edge+0.05,vR)); vec3 c=mix(uColor,uTip,tip); float a=on+tip; if(a<0.02)discard; gl_FragColor=vec4(c,a);}`});
+      fragmentShader:`uniform float uFront; uniform float uFill; uniform vec3 uColor; uniform vec3 uTip; varying float vR;
+        void main(){ float edge=1.0-uFront; float on=step(edge,vR); float tip=on*(1.0-smoothstep(edge,edge+0.05,vR));
+        vec3 c=mix(uColor,uTip,max(tip,uFill*0.75)); float a=on+tip; a=max(a,uFill*on); if(a<0.02)discard; gl_FragColor=vec4(c,a);}`});
     this.snet.add(new THREE.LineSegments(g,this.snetMat));
 
     // intersection nodes (ray × ring)
@@ -213,19 +214,19 @@ export default class Experience {
     {p:0.46,pos:[16,7,15],look:[-4,3,-24]},      // close on cables
     {p:0.58,pos:[0,5.4,58],look:[0,3,-8]},       // behind near end, over water
     {p:0.66,pos:[0,4.6,8],look:[0,3,-70]},       // crossing the bridge, forward
-    {p:0.73,pos:[0,44,-96],look:[0,4,-190]},     // exit + rising toward the city
-    {p:0.83,pos:[0,150,-150],look:[0,1,-205]},   // high, the étoile reads
-    {p:0.91,pos:[0,208,-198],look:[0,0,-204]},   // near TOP-DOWN centred on the core
-    {p:0.965,pos:[0,214,-201],look:[0,0,-203]},  // hold for the convergence flare
-    {p:1.00,pos:[48,58,-38],look:[-4,7,-176]},   // hero: bridge + water + glowing city
-    {p:1.12,pos:[40,64,-30],look:[-4,7,-176]},   // scroll tail
+    {p:0.73,pos:[0,48,-110],look:[0,4,-232]},    // exit + rising toward the city
+    {p:0.83,pos:[0,158,-182],look:[0,1,-244]},   // high, the étoile reads
+    {p:0.91,pos:[0,220,-238],look:[0,0,-244]},   // near TOP-DOWN centred on the core
+    {p:0.965,pos:[0,226,-241],look:[0,0,-243]},  // hold for the convergence flare
+    {p:1.00,pos:[54,64,-72],look:[-4,7,-214]},   // hero: bridge + water + glowing city
+    {p:1.12,pos:[46,70,-62],look:[-4,7,-214]},   // scroll tail
   ];}
   _applyCamera(p){const shots=this._shots;let i=0;while(i<shots.length-1&&p>shots[i+1].p)i++;const a=shots[i],b=shots[Math.min(i+1,shots.length-1)];const t=smooth((p-a.p)/((b.p-a.p)||1));const L=(u,v2)=>u+(v2-u)*t;let px=L(a.pos[0],b.pos[0]),py=L(a.pos[1],b.pos[1]),pz=L(a.pos[2],b.pos[2]);let lx=L(a.look[0],b.look[0]),ly=L(a.look[1],b.look[1]),lz=L(a.look[2],b.look[2]);if(p>=0.985&&!this.reducedMotion){const s=smooth((p-0.985)/0.015);px+=Math.sin(this.time*0.3)*1.2*s;py+=Math.cos(this.time*0.24)*0.6*s;}this.camera.position.set(px,py,pz);this.camera.lookAt(lx,ly,lz);}
   enterPage(){this._pageActive=true;this.setProgress(1);}
   setPage(t){this._page=clamp(t,0,1);}
   get _pageShots(){return[
-    {p:0.00,pos:[48,58,-38],look:[-4,7,-176]},{p:0.20,pos:[54,66,-24],look:[-4,6,-176]},
-    {p:0.50,pos:[24,120,-90],look:[0,1,-200]},{p:1.00,pos:[0,210,-198],look:[0,0,-204]}];}
+    {p:0.00,pos:[54,64,-72],look:[-4,7,-214]},{p:0.20,pos:[60,74,-58],look:[-4,6,-214]},
+    {p:0.50,pos:[24,130,-140],look:[0,1,-240]},{p:1.00,pos:[0,232,-238],look:[0,0,-244]}];}
   _applyPage(t){const shots=this._pageShots;let i=0;while(i<shots.length-1&&t>shots[i+1].p)i++;const a=shots[i],b=shots[Math.min(i+1,shots.length-1)];const k=smooth((t-a.p)/((b.p-a.p)||1));const L=(u,v2)=>u+(v2-u)*k;const bob=this.reducedMotion?0:1;this.camera.position.set(L(a.pos[0],b.pos[0])+Math.sin(this.time*0.22)*1.3*bob,L(a.pos[1],b.pos[1])+Math.cos(this.time*0.18)*0.8*bob,L(a.pos[2],b.pos[2]));this.camera.lookAt(L(a.look[0],b.look[0]),L(a.look[1],b.look[1]),L(a.look[2],b.look[2]));}
 
   /* ===================== STATE ===================== */
@@ -237,11 +238,13 @@ export default class Experience {
     this._cityReveal=win(P,0.48,0.70);this._updateCity(this._cityReveal);
     const show=this._cityReveal>0.12;if(this._treeFol){this._treeFol.visible=show;this._treeTrunk.visible=show;}
     if(this.cars){const cs=this._cityReveal>0.2;for(const c of this.cars)c.mesh.visible=cs;}
-    this._netReveal=win(P,0.72,0.92);if(this.snetMat)this.snetMat.uniforms.uFront.value=this._netReveal;if(this.snetNodeMat)this.snetNodeMat.opacity=smooth(this._netReveal*1.3);
+    this._netReveal=win(P,0.72,0.90);
+    if(this.snetMat){this.snetMat.uniforms.uFront.value=this._netReveal;this.snetMat.uniforms.uFill.value=win(P,0.88,1.0);}
+    if(this.snetNodeMat)this.snetNodeMat.opacity=smooth(this._netReveal*1.4);
     if(this.beacons)this.beacons.forEach(s=>s.material.opacity=win(P,0.5,0.62)*0.85);
-    // centre flare
-    const flare=win(P,0.90,0.985);if(this.core){this.core.material.opacity=flare;this.core.scale.setScalar(4+flare*30);}
-    if(this.shock){const sw=win(P,0.91,1.0);this.shock.material.opacity=sw*(1-sw)*2.2;this.shock.scale.setScalar(6+sw*150);}
+    // centre converges → flares big, and stays lit
+    const flare=win(P,0.88,0.98);if(this.core){this.core.material.opacity=Math.max(flare,win(P,0.9,1.0));this.core.scale.setScalar(5+flare*48);}
+    if(this.shock){const sw=win(P,0.90,1.0);this.shock.material.opacity=sw*(1-sw)*2.4;this.shock.scale.setScalar(6+sw*170);}
     if(!this._running||this.reducedMotion)this._applyCamera(this.progress);
   }
   _updateCity(reveal){if(!this._buildings||Math.abs(this._cityRevApplied-reveal)<0.001)return;this._cityRevApplied=reveal;const d=this._bd;this.buildings.forEach((b,i)=>{const r=smooth((reveal-b.delay)*3.0);const h=Math.max(0.001,b.h*r);d.position.set(b.x,h/2,b.z);d.scale.set(b.w,h,b.d);d.rotation.set(0,b.rot,0);d.updateMatrix();this._buildings.setMatrixAt(i,d.matrix);});this._buildings.instanceMatrix.needsUpdate=true;}

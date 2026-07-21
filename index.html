@@ -37,8 +37,10 @@
 
   <!-- ============ CINEMATIC INTRO TITLES ============ -->
   <div id="intro-titles" aria-hidden="true">
-    <div class="intro-word">BRIDGENT</div>
-    <div class="intro-sub">Struktur trifft Intelligenz</div>
+    <svg class="sig" viewBox="0 0 900 230" preserveAspectRatio="xMidYMid meet">
+      <text class="sig-text" x="450" y="150" text-anchor="middle">BRIDGENT</text>
+      <text class="sig-sub" x="450" y="200" text-anchor="middle">Struktur trifft Intelligenz</text>
+    </svg>
   </div>
   <button class="skip-intro" type="button">Intro überspringen →</button>
 
@@ -190,11 +192,32 @@
             </g>
             <!-- pylon apex beacons -->
             <circle cx="360" cy="56" r="4" fill="#0e7c82"/><circle cx="840" cy="56" r="4" fill="#0e7c82"/>
+            <!-- NETWORK LAYER: the crossing is itself a connected system -->
+            <g stroke="#0e9ca8" stroke-width="1.1" fill="none" opacity="0.6">
+              <!-- shore anchors into the network -->
+              <path d="M40 196 L120 164"/><path d="M1160 196 L1080 164"/>
+              <!-- backbone along the deck -->
+              <line x1="120" y1="164" x2="1080" y2="164"/>
+              <!-- mesh links (skip connections) -->
+              <path d="M120 164 Q320 120 520 164"/><path d="M520 164 Q720 120 920 164"/>
+              <path d="M320 164 Q520 210 720 164"/><path d="M600 164 L360 60"/><path d="M600 164 L840 60"/>
+            </g>
+            <g fill="#0e9ca8">
+              <circle cx="120" cy="164" r="3.4"/><circle cx="320" cy="164" r="3.4"/><circle cx="520" cy="164" r="3.4"/>
+              <circle cx="720" cy="164" r="3.4"/><circle cx="920" cy="164" r="3.4"/><circle cx="1080" cy="164" r="3.4"/>
+            </g>
+            <!-- flowing data pulses across the connection -->
+            <g class="prozess__flow" fill="#18d0e0">
+              <circle class="pflow" cx="120" cy="164" r="4.2"/>
+              <circle class="pflow" cx="120" cy="164" r="4.2" style="animation-delay:.9s"/>
+              <circle class="pflow" cx="120" cy="164" r="4.2" style="animation-delay:1.8s"/>
+              <circle class="pflow" cx="120" cy="164" r="4.2" style="animation-delay:2.7s"/>
+            </g>
             <!-- journey nodes on the deck (aligned with the three steps) -->
             <g>
-              <circle class="pnode" cx="200" cy="170" r="7" fill="#0e9ca8"/>
-              <circle class="pnode" cx="600" cy="170" r="7" fill="#0e9ca8" style="animation-delay:.5s"/>
-              <circle class="pnode" cx="1000" cy="170" r="7" fill="#0e9ca8" style="animation-delay:1s"/>
+              <circle class="pnode" cx="200" cy="170" r="7" fill="#0e7c82"/>
+              <circle class="pnode" cx="600" cy="170" r="7" fill="#0e7c82" style="animation-delay:.5s"/>
+              <circle class="pnode" cx="1000" cy="170" r="7" fill="#0e7c82" style="animation-delay:1s"/>
             </g>
           </svg>
         </div>

@@ -89,19 +89,31 @@ img,svg{display:block;}
 /* ============================================================
    INTRO OVERLAY (titles over the flythrough) — dark text on light
    ============================================================ */
-#intro-titles{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;transition:opacity .6s ease;}
+#intro-titles{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;display:flex;align-items:center;justify-content:center;transition:opacity .6s ease;}
 #intro-titles.on{opacity:1;}
 #intro-titles.gone{opacity:0;visibility:hidden;}
-.intro-word{
-  position:absolute;left:0;right:0;bottom:13vh;text-align:center;
-  font-family:var(--disp);font-stretch:120%;font-weight:800;
-  font-size:clamp(30px,5vw,64px);letter-spacing:7px;color:var(--ink);
-  animation:introWord 1.6s cubic-bezier(.2,.7,.15,1) both;
+/* a blue line draws the BRIDGENT wordmark, then fills */
+.sig{width:min(72vw,780px);height:auto;overflow:visible;}
+.sig-text{
+  font-family:var(--disp);font-weight:700;font-stretch:112%;font-size:120px;letter-spacing:1px;
+  fill:transparent;stroke:var(--accent);stroke-width:1.25;
+  stroke-dasharray:2400;stroke-dashoffset:2400;paint-order:stroke;
 }
-.intro-sub{
-  position:absolute;left:0;right:0;bottom:9.2vh;text-align:center;
-  font-family:var(--mono);font-size:11px;letter-spacing:4px;color:var(--accent-deep);
-  text-transform:uppercase;opacity:0;animation:introWord 1.2s ease .5s both;
+.sig-sub{
+  font-family:var(--mono);font-size:15px;letter-spacing:8px;fill:var(--accent-deep);
+  opacity:0;text-transform:uppercase;
+}
+#intro-titles.on .sig-text{animation:sigDraw 2.6s cubic-bezier(.35,.6,.2,1) forwards;}
+#intro-titles.on .sig-sub{animation:sigSub 1s ease 2.2s forwards;}
+@keyframes sigDraw{
+  0%{stroke-dashoffset:2400;fill:rgba(14,156,168,0);}
+  62%{stroke-dashoffset:0;fill:rgba(14,156,168,0);}
+  100%{stroke-dashoffset:0;fill:rgba(20,40,54,0.92);stroke:var(--accent-deep);}
+}
+@keyframes sigSub{to{opacity:1;}}
+@media (prefers-reduced-motion: reduce){
+  .sig-text{stroke-dashoffset:0;fill:rgba(20,40,54,0.92);}
+  .sig-sub{opacity:1;}
 }
 .skip-intro{
   position:fixed;right:26px;bottom:24px;z-index:61;pointer-events:auto;
@@ -189,11 +201,7 @@ section{position:relative;}
 .eyebrow.mb{margin-bottom:18px;display:block;}
 
 /* --- System (module grid) --- */
-.system{
-  background:var(--panel);
-  background-image:linear-gradient(rgba(14,124,130,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(14,124,130,0.05) 1px,transparent 1px);
-  background-size:64px 64px;
-}
+.system{background:var(--panel);}
 /* clean 3 × 2 grid */
 .modules{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
 @media (max-width:900px){.modules{grid-template-columns:repeat(2,1fr);}}
@@ -217,6 +225,9 @@ section{position:relative;}
 .prozess__bridge svg{width:100%;height:auto;display:block;overflow:visible;}
 .pnode{transform-box:fill-box;transform-origin:center;animation:pnodePulse 2.6s ease-in-out infinite;}
 @keyframes pnodePulse{0%,100%{opacity:.55;r:6}50%{opacity:1;r:8}}
+.pflow{filter:drop-shadow(0 0 3px rgba(24,208,224,0.9));animation:pflow 3.6s linear infinite;}
+@keyframes pflow{0%{transform:translateX(0);opacity:0}6%{opacity:1}94%{opacity:1}100%{transform:translateX(960px);opacity:0}}
+@media (prefers-reduced-motion: reduce){.pnode,.pflow{animation:none;}.pflow{opacity:0;}}
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;padding-top:8px;}
 .step{border:1px solid var(--line);border-top:2px solid var(--accent-deep);background:var(--panel);padding:30px 26px;box-shadow:0 12px 34px rgba(10,21,38,0.05);}
 .step__num{font-family:var(--mono);font-size:13px;color:var(--accent-deep);letter-spacing:1px;margin-bottom:16px;}
@@ -285,25 +296,28 @@ section{position:relative;}
    sections. Cards stay opaque so copy is always crisp.
    ============================================================ */
 @media (min-width:961px){
+  /* the 3D world stays clearly visible behind the content — lighter frost,
+     lower opacity — while cards stay opaque so copy is always crisp */
   body.has-scene .system,
   body.has-scene .prozess,
   body.has-scene .usecases,
   body.has-scene .vertrauen{
-    background:rgba(240,244,247,0.74);
-    -webkit-backdrop-filter:blur(8px) saturate(1.05);
-    backdrop-filter:blur(8px) saturate(1.05);
+    background:rgba(238,242,246,0.46);
+    -webkit-backdrop-filter:blur(3px) saturate(1.06);
+    backdrop-filter:blur(3px) saturate(1.06);
   }
-  /* keep the concrete grid on the system section over the frosted base */
-  body.has-scene .system{
-    background-color:rgba(240,244,247,0.74);
-    background-image:linear-gradient(rgba(14,124,130,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(14,124,130,0.05) 1px,transparent 1px);
-    background-size:64px 64px;
-  }
-  body.has-scene .cta{background:rgba(240,244,247,0.6);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);}
-  body.has-scene .kontakt{background:rgba(231,238,243,0.9);-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);}
-  body.has-scene .footer{background:rgba(10,21,38,0.93);-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);}
+  body.has-scene .cta{background:rgba(238,242,246,0.4);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);}
+  body.has-scene .kontakt{background:rgba(231,238,243,0.86);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);}
+  body.has-scene .footer{background:rgba(10,21,38,0.9);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);}
   /* keep the fixed scene visible the whole way down */
   body.has-scene #webgl{opacity:1 !important;}
+  /* readability lift for section headers sitting over the livelier world */
+  body.has-scene .section__head h2,
+  body.has-scene .section__head p,
+  body.has-scene .vertrauen h2,
+  body.has-scene .vertrauen p,
+  body.has-scene .prozess__states span,
+  body.has-scene .eyebrow{ text-shadow:0 1px 3px rgba(255,255,255,0.75); }
 }
 
 /* ============================================================

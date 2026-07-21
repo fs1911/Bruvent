@@ -84,6 +84,8 @@ export default class Experience {
     this.progress = 0;
     this.time = 0;
     this._scroll = 0;
+    this._pageActive = false;   // after the intro: scroll drives a calm fly-over
+    this._page = 0;
     this._running = true;
     this._visible = true;
 
@@ -498,6 +500,38 @@ export default class Experience {
     this.camera.lookAt(lx, ly, lz);
   }
 
+  /* ---------- page fly-over (after the intro) ----------
+     Scroll drives a calm, high crane that keeps the bridge AND the
+     network in frame while the content sections read over it. */
+  enterPage() { this._pageActive = true; this.setProgress(1); }
+  setPage(t) { this._page = clamp(t, 0, 1); }
+
+  get _pageShots() {
+    return [
+      { p: 0.00, pos: [42, 22, 48], look: [-6, 11, -22] },   // hero lock
+      { p: 0.14, pos: [47, 27, 55], look: [-6, 10, -32] },   // ease back
+      { p: 0.42, pos: [56, 46, 66], look: [-8, 6, -66] },    // rise, wider — bridge + city
+      { p: 0.72, pos: [30, 74, 70], look: [-6, 3, -104] },   // high overview, network reads
+      { p: 1.00, pos: [4, 96, 104], look: [-4, 1, -150] },   // distant, calm drift over the world
+    ];
+  }
+
+  _applyPage(t) {
+    const shots = this._pageShots;
+    let i = 0;
+    while (i < shots.length - 1 && t > shots[i + 1].p) i++;
+    const a = shots[i], b = shots[Math.min(i + 1, shots.length - 1)];
+    const k = smooth((t - a.p) / ((b.p - a.p) || 1));
+    const L = (u, v2) => u + (v2 - u) * k;
+    const bob = this.reducedMotion ? 0 : 1;
+    this.camera.position.set(
+      L(a.pos[0], b.pos[0]) + Math.sin(this.time * 0.25) * 1.2 * bob,
+      L(a.pos[1], b.pos[1]) + Math.cos(this.time * 0.2) * 0.7 * bob,
+      L(a.pos[2], b.pos[2])
+    );
+    this.camera.lookAt(L(a.look[0], b.look[0]), L(a.look[1], b.look[1]), L(a.look[2], b.look[2]));
+  }
+
   /* ==================================================
      STATE — everything as a function of progress
      ================================================== */
@@ -514,13 +548,13 @@ export default class Experience {
       part.mesh.quaternion.slerpQuaternions(part.fromQuat, part.toQuat, lt);
     }
 
-    const roadRev = win(P, 0.50, 0.62);
+    const roadRev = win(P, 0.46, 0.58);
     for (const m of this.roadMats) m.opacity = roadRev * 0.95;
 
-    this._cityReveal = win(P, 0.60, 0.76);
+    this._cityReveal = win(P, 0.55, 0.78);
     this._updateCity(this._cityReveal);
 
-    this._netReveal = win(P, 0.72, 0.86);
+    this._netReveal = win(P, 0.74, 0.92);
     const nr = this._netReveal;
     if (this.edgeMat) this.edgeMat.opacity = nr * 0.9;
     if (this.nodeMat) this.nodeMat.opacity = nr;
@@ -580,7 +614,9 @@ export default class Experience {
     }
 
     if (this._visible) {
-      if (!this.reducedMotion) this._applyCamera(this.progress);
+      if (this.reducedMotion) { /* fixed framing */ }
+      else if (this._pageActive) this._applyPage(this._page);
+      else this._applyCamera(this.progress);
       this.renderer.render(this.scene, this.camera);
     }
     this._raf = requestAnimationFrame(this._tick);

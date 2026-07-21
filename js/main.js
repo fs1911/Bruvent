@@ -117,20 +117,21 @@ function playIntro() {
 
   if (skip) skip.addEventListener('click', finish);
 
+  const set = () => state.exp.setProgress(proxy.p);
   const tl = gsap.timeline({ onComplete: finish });
   state.intro = tl;
 
-  // Drive the master progress through the eight shots. The pacing is
-  // deliberate: the mechanical assembly and the flythrough need room to
-  // read. Non-linear easing gives the exploded view a calm beat before
-  // the assembly, and a gentle settle into the hero lock.
-  tl.to(proxy, {
-    p: 1, duration: 20.5, ease: 'power1.inOut',
-    onUpdate: () => state.exp.setProgress(proxy.p),
-  });
+  // Re-balanced dramaturgy: get the bridge built quickly, then give the
+  // city / network / flythrough real room to breathe.
+  tl.to(proxy, { p: 0.44, duration: 5.4, ease: 'power2.out', onUpdate: set })   // fast mechanical build
+    .to(proxy, { p: 0.50, duration: 1.4, ease: 'sine.inOut', onUpdate: set })   // completed-bridge beat
+    .to(proxy, { p: 0.60, duration: 2.8, ease: 'none', onUpdate: set })         // roadway extends
+    .to(proxy, { p: 0.76, duration: 5.0, ease: 'none', onUpdate: set })         // city emerges (slow, readable)
+    .to(proxy, { p: 0.88, duration: 4.0, ease: 'none', onUpdate: set })         // network activates
+    .to(proxy, { p: 1.00, duration: 5.4, ease: 'power1.inOut', onUpdate: set }); // flythrough → hero lock
 
-  // title cards fade in over the drone flythrough → hero lock
-  tl.add(() => { if (titles) titles.classList.add('on'); }, 16.2);
+  // title cards fade in over the flythrough → hero lock
+  tl.add(() => { if (titles) titles.classList.add('on'); }, tl.duration() - 3.4);
 }
 
 /* ============================================================
@@ -172,26 +173,29 @@ function setupScroll(noWebgl) {
 
   if (!ScrollTrigger) return;
 
-  // Pinned hero: scrub the camera tail + fade the scene/text out
-  if (!noWebgl && state.exp && !REDUCED) {
+  // After the intro the world stays present: scroll drives a calm, high
+  // crane over the bridge + network for the WHOLE page (desktop). The
+  // frosted content sections read over the living scene.
+  if (!noWebgl && state.exp && !REDUCED && !IS_MOBILE) {
+    document.body.classList.add('has-scene');
+    state.exp.enterPage();
     const heroText = heroRevealEls();
     ScrollTrigger.create({
-      trigger: '#hero',
+      trigger: document.body,
       start: 'top top',
-      end: '+=110%',
-      pin: '.hero__grid',
-      pinSpacing: true,
-      scrub: 0.6,
+      end: 'bottom bottom',
+      scrub: 0.7,
       onUpdate: (self) => {
-        const s = self.progress;
-        state.exp.setScroll(s);
-        gsap.set(heroText, { opacity: 1 - s * 1.1, y: -s * 40 });
+        state.exp.setPage(self.progress);
+        // fade the hero copy out quickly over the first part of the scroll
+        const f = Math.min(1, Math.max(0, self.progress / 0.10));
+        gsap.set(heroText, { opacity: 1 - f, y: -f * 40 });
       },
     });
-    // keep rendering while the scene is still (partly) visible behind the
-    // fading hero, then suspend once content fully covers it (battery)
+  } else if (!noWebgl && state.exp && !REDUCED) {
+    // mobile: keep the light behaviour — suspend the canvas once covered
     ScrollTrigger.create({
-      trigger: '#system', start: 'top 35%',
+      trigger: '#system', start: 'top 60%',
       onEnter: () => state.exp && state.exp.setVisible(false),
       onLeaveBack: () => state.exp && state.exp.setVisible(true),
     });

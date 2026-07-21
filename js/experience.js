@@ -176,34 +176,40 @@ export default class Experience {
   /* ===================== NETWORK — converges from the edges to the centre ===================== */
   _buildNetwork(){
     this.snet=new THREE.Group();this.scene.add(this.snet);
-    const pos=[],aR=[]; const y=0.4;
-    const seg=(x1,z1,x2,z2,r1,r2)=>{const n=Math.max(1,Math.round(Math.hypot(x2-x1,z2-z1)/5));for(let i=0;i<n;i++){const t1=i/n,t2=(i+1)/n;pos.push(x1+(x2-x1)*t1,y,z1+(z2-z1)*t1,x1+(x2-x1)*t2,y,z1+(z2-z1)*t2);aR.push(r1+(r2-r1)*t1,r1+(r2-r1)*t2);}};
-    // radial avenues (centre → outer), aR = radius/ROUT
-    for(let k=0;k<RAYS;k++){const[dx,dz]=rayDir(k);seg(CX+dx*PLAZA,CZ+dz*PLAZA,CX+dx*ROUT,CZ+dz*ROUT,PLAZA/ROUT,1);}
-    // rings (constant radius)
-    for(const rr of RINGS){const rn=rr/ROUT;const nSeg=64;for(let i=0;i<nSeg;i++){const a1=i/nSeg*Math.PI*2,a2=(i+1)/nSeg*Math.PI*2;seg(CX+Math.cos(a1)*rr,CZ+Math.sin(a1)*rr,CX+Math.cos(a2)*rr,CZ+Math.sin(a2)*rr,rn,rn);}}
-    // spur from the bridge into the étoile (continues down to the centre)
-    seg(0,-70,CX+rayDir(3)[0]*ROUT,CZ+rayDir(3)[1]*ROUT,1.13,1);
-    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('aR',new THREE.Float32BufferAttribute(aR,1));
-    this.snetMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,
-      uniforms:{uFront:{value:0},uFill:{value:0},uColor:{value:new THREE.Color(0x0c93a6)},uTip:{value:new THREE.Color(0x7ff2ff)}},
+    // avenues + rings as GLOWING RIBBONS (wide, clearly visible) with aR per vertex
+    const P=[],A=[]; const y=0.16, hwRay=1.0, hwRing=0.8;
+    const pushV=(x,z,r)=>{P.push(x,y,z);A.push(r);};
+    const quad=(a,b,c,d,r1,r2)=>{pushV(a[0],a[1],r1);pushV(b[0],b[1],r1);pushV(c[0],c[1],r2);pushV(c[0],c[1],r2);pushV(b[0],b[1],r1);pushV(d[0],d[1],r2);};
+    for(let k=0;k<RAYS;k++){const[dx,dz]=rayDir(k);const px=-dz,pz=dx;const n=40;
+      for(let i=0;i<n;i++){const ra=i/n*ROUT,rb=(i+1)/n*ROUT;const ax=CX+dx*ra,az=CZ+dz*ra,bx=CX+dx*rb,bz=CZ+dz*rb;
+        quad([ax+px*hwRay,az+pz*hwRay],[ax-px*hwRay,az-pz*hwRay],[bx+px*hwRay,bz+pz*hwRay],[bx-px*hwRay,bz-pz*hwRay],ra/ROUT,rb/ROUT);}}
+    for(const rad of RINGS){const rn=rad/ROUT,n=80;
+      for(let i=0;i<n;i++){const a1=i/n*Math.PI*2,a2=(i+1)/n*Math.PI*2;
+        quad([CX+Math.cos(a1)*(rad-hwRing),CZ+Math.sin(a1)*(rad-hwRing)],[CX+Math.cos(a1)*(rad+hwRing),CZ+Math.sin(a1)*(rad+hwRing)],
+             [CX+Math.cos(a2)*(rad-hwRing),CZ+Math.sin(a2)*(rad-hwRing)],[CX+Math.cos(a2)*(rad+hwRing),CZ+Math.sin(a2)*(rad+hwRing)],rn,rn);}}
+    {const[dx,dz]=rayDir(3);const px=-dz,pz=dx;const ax=0,az=-70,bx=CX+dx*ROUT,bz=CZ+dz*ROUT;
+      quad([ax+px*hwRay,az+pz*hwRay],[ax-px*hwRay,az-pz*hwRay],[bx+px*hwRay,bz+pz*hwRay],[bx-px*hwRay,bz-pz*hwRay],1.13,1.0);}
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('aR',new THREE.Float32BufferAttribute(A,1));
+    this.snetMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,
+      uniforms:{uFront:{value:0},uFill:{value:0},uColor:{value:new THREE.Color(0x0ea6ba)},uTip:{value:new THREE.Color(0xffffff)}},
       vertexShader:`attribute float aR; varying float vR; void main(){ vR=aR; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
       fragmentShader:`uniform float uFront; uniform float uFill; uniform vec3 uColor; uniform vec3 uTip; varying float vR;
-        void main(){ float edge=1.0-uFront; float on=step(edge,vR); float tip=on*(1.0-smoothstep(edge,edge+0.05,vR));
-        vec3 c=mix(uColor,uTip,max(tip,uFill*0.75)); float a=on+tip; a=max(a,uFill*on); if(a<0.02)discard; gl_FragColor=vec4(c,a);}`});
-    this.snet.add(new THREE.LineSegments(g,this.snetMat));
+        void main(){ float edge=1.0-uFront; float on=step(edge,vR); float tip=on*(1.0-smoothstep(edge,edge+0.06,vR));
+        vec3 c=mix(uColor,uTip,max(tip,uFill*0.6)); float a=on*(0.85+0.15*uFill)+tip*0.7; if(a<0.02)discard; gl_FragColor=vec4(c,a);}`});
+    this.snet.add(new THREE.Mesh(g,this.snetMat));
 
-    // intersection nodes (ray × ring)
+    // intersection nodes (ray × ring) — clear knots
     this._interData=[];for(let k=0;k<RAYS;k++){const[dx,dz]=rayDir(k);for(const rr of RINGS)this._interData.push({x:CX+dx*rr,z:CZ+dz*rr,rN:rr/ROUT});}
-    const nodes=new THREE.InstancedMesh(new THREE.SphereGeometry(1.0,10,10),new THREE.MeshBasicMaterial({transparent:true,opacity:0}),this._interData.length);
-    const d=new THREE.Object3D();this._interData.forEach((it,i)=>{d.position.set(it.x,0.6,it.z);d.updateMatrix();nodes.setMatrixAt(i,d.matrix);nodes.setColorAt(i,this._sky);});
+    const nodes=new THREE.InstancedMesh(new THREE.SphereGeometry(1.2,10,10),new THREE.MeshBasicMaterial({transparent:true,opacity:0}),this._interData.length);
+    const d=new THREE.Object3D();this._interData.forEach((it,i)=>{d.position.set(it.x,0.5,it.z);d.updateMatrix();nodes.setMatrixAt(i,d.matrix);nodes.setColorAt(i,this._sky);});
     nodes.instanceMatrix.needsUpdate=true;if(nodes.instanceColor)nodes.instanceColor.needsUpdate=true;this.snetNodes=nodes;this.snetNodeMat=nodes.material;this.snet.add(nodes);
 
-    // converging heads (one per avenue) rushing inward to the centre
-    this.heads=[];for(let k=0;k<RAYS;k++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:this._dotTex,color:0xffffff,transparent:true,opacity:0,depthWrite:false}));s.scale.setScalar(3.4);this.snet.add(s);this.heads.push({k,sp:s});}
+    // converging heads rush inward and COLLIDE at the centre
+    this.heads=[];for(let k=0;k<RAYS;k++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:this._dotTex,color:0xffffff,transparent:true,opacity:0,depthWrite:false}));s.scale.setScalar(4);this.snet.add(s);this.heads.push({k,sp:s});}
 
-    // the CENTRE — flares big when everything converges
-    this.core=new THREE.Sprite(new THREE.SpriteMaterial({map:this._dotTex,color:0xffffff,transparent:true,opacity:0,depthWrite:false}));this.core.position.set(CX,0.8,CZ);this.core.scale.setScalar(4);this.snet.add(this.core);
+    // the CENTRE: a filled disc that stays lit + the flare + a shockwave
+    this.centerDisc=new THREE.Mesh(new THREE.CircleGeometry(7,40),new THREE.MeshBasicMaterial({color:0x14c6d6,transparent:true,opacity:0}));this.centerDisc.rotation.x=-Math.PI/2;this.centerDisc.position.set(CX,0.2,CZ);this.snet.add(this.centerDisc);
+    this.core=new THREE.Sprite(new THREE.SpriteMaterial({map:this._dotTex,color:0xffffff,transparent:true,opacity:0,depthWrite:false}));this.core.position.set(CX,0.9,CZ);this.core.scale.setScalar(4);this.snet.add(this.core);
     this.shock=new THREE.Sprite(new THREE.SpriteMaterial({map:this._dotTex,color:COL.accentBright,transparent:true,opacity:0,depthWrite:false}));this.shock.position.set(CX,0.6,CZ);this.snet.add(this.shock);
   }
 
@@ -214,19 +220,20 @@ export default class Experience {
     {p:0.46,pos:[16,7,15],look:[-4,3,-24]},      // close on cables
     {p:0.58,pos:[0,5.4,58],look:[0,3,-8]},       // behind near end, over water
     {p:0.66,pos:[0,4.6,8],look:[0,3,-70]},       // crossing the bridge, forward
-    {p:0.73,pos:[0,48,-110],look:[0,4,-232]},    // exit + rising toward the city
-    {p:0.83,pos:[0,158,-182],look:[0,1,-244]},   // high, the étoile reads
-    {p:0.91,pos:[0,220,-238],look:[0,0,-244]},   // near TOP-DOWN centred on the core
-    {p:0.965,pos:[0,226,-241],look:[0,0,-243]},  // hold for the convergence flare
-    {p:1.00,pos:[54,64,-72],look:[-4,7,-214]},   // hero: bridge + water + glowing city
-    {p:1.12,pos:[46,70,-62],look:[-4,7,-214]},   // scroll tail
+    {p:0.73,pos:[0,52,-120],look:[0,3,-234]},    // exit + rising toward the city
+    {p:0.83,pos:[0,170,-210],look:[0,0,-241]},   // rising to top-down, étoile reads
+    {p:0.91,pos:[0,235,-240],look:[0,0,-240]},   // TRUE top-down, centred on the core
+    {p:1.00,pos:[0,242,-240],look:[0,0,-240]},   // hold top-down for collision → B → BRIDGENT
+    {p:1.12,pos:[0,248,-240],look:[0,0,-240]},   // scroll tail
   ];}
   _applyCamera(p){const shots=this._shots;let i=0;while(i<shots.length-1&&p>shots[i+1].p)i++;const a=shots[i],b=shots[Math.min(i+1,shots.length-1)];const t=smooth((p-a.p)/((b.p-a.p)||1));const L=(u,v2)=>u+(v2-u)*t;let px=L(a.pos[0],b.pos[0]),py=L(a.pos[1],b.pos[1]),pz=L(a.pos[2],b.pos[2]);let lx=L(a.look[0],b.look[0]),ly=L(a.look[1],b.look[1]),lz=L(a.look[2],b.look[2]);if(p>=0.985&&!this.reducedMotion){const s=smooth((p-0.985)/0.015);px+=Math.sin(this.time*0.3)*1.2*s;py+=Math.cos(this.time*0.24)*0.6*s;}this.camera.position.set(px,py,pz);this.camera.lookAt(lx,ly,lz);}
   enterPage(){this._pageActive=true;this.setProgress(1);}
   setPage(t){this._page=clamp(t,0,1);}
   get _pageShots(){return[
-    {p:0.00,pos:[54,64,-72],look:[-4,7,-214]},{p:0.20,pos:[60,74,-58],look:[-4,6,-214]},
-    {p:0.50,pos:[24,130,-140],look:[0,1,-240]},{p:1.00,pos:[0,232,-238],look:[0,0,-244]}];}
+    {p:0.00,pos:[0,242,-240],look:[0,0,-240]},   // top-down centred (matches the intro end)
+    {p:0.28,pos:[26,190,-165],look:[0,2,-236]},  // tilt + rise off the centre
+    {p:0.62,pos:[56,120,-80],look:[-4,5,-212]},  // 3/4 overview: bridge + water + glowing étoile
+    {p:1.00,pos:[74,96,-40],look:[-6,6,-205]}];}
   _applyPage(t){const shots=this._pageShots;let i=0;while(i<shots.length-1&&t>shots[i+1].p)i++;const a=shots[i],b=shots[Math.min(i+1,shots.length-1)];const k=smooth((t-a.p)/((b.p-a.p)||1));const L=(u,v2)=>u+(v2-u)*k;const bob=this.reducedMotion?0:1;this.camera.position.set(L(a.pos[0],b.pos[0])+Math.sin(this.time*0.22)*1.3*bob,L(a.pos[1],b.pos[1])+Math.cos(this.time*0.18)*0.8*bob,L(a.pos[2],b.pos[2]));this.camera.lookAt(L(a.look[0],b.look[0]),L(a.look[1],b.look[1]),L(a.look[2],b.look[2]));}
 
   /* ===================== STATE ===================== */
@@ -239,12 +246,15 @@ export default class Experience {
     const show=this._cityReveal>0.12;if(this._treeFol){this._treeFol.visible=show;this._treeTrunk.visible=show;}
     if(this.cars){const cs=this._cityReveal>0.2;for(const c of this.cars)c.mesh.visible=cs;}
     this._netReveal=win(P,0.72,0.90);
-    if(this.snetMat){this.snetMat.uniforms.uFront.value=this._netReveal;this.snetMat.uniforms.uFill.value=win(P,0.88,1.0);}
+    if(this.snetMat){this.snetMat.uniforms.uFront.value=this._netReveal;this.snetMat.uniforms.uFill.value=win(P,0.86,0.98);}
     if(this.snetNodeMat)this.snetNodeMat.opacity=smooth(this._netReveal*1.4);
     if(this.beacons)this.beacons.forEach(s=>s.material.opacity=win(P,0.5,0.62)*0.85);
-    // centre converges → flares big, and stays lit
-    const flare=win(P,0.88,0.98);if(this.core){this.core.material.opacity=Math.max(flare,win(P,0.9,1.0));this.core.scale.setScalar(5+flare*48);}
-    if(this.shock){const sw=win(P,0.90,1.0);this.shock.material.opacity=sw*(1-sw)*2.4;this.shock.scale.setScalar(6+sw*170);}
+    // centre: filled disc lights as the lines meet and STAYS lit (also under scroll)
+    const conv=win(P,0.85,0.95);
+    if(this.centerDisc)this.centerDisc.material.opacity=conv*0.9;
+    // collision flare + shockwave
+    const flare=win(P,0.87,0.97);if(this.core){this.core.material.opacity=Math.max(flare,win(P,0.9,1.0));this.core.scale.setScalar(5+flare*52);}
+    if(this.shock){const sw=win(P,0.89,1.0);this.shock.material.opacity=sw*(1-sw)*2.6;this.shock.scale.setScalar(6+sw*190);}
     if(!this._running||this.reducedMotion)this._applyCamera(this.progress);
   }
   _updateCity(reveal){if(!this._buildings||Math.abs(this._cityRevApplied-reveal)<0.001)return;this._cityRevApplied=reveal;const d=this._bd;this.buildings.forEach((b,i)=>{const r=smooth((reveal-b.delay)*3.0);const h=Math.max(0.001,b.h*r);d.position.set(b.x,h/2,b.z);d.scale.set(b.w,h,b.d);d.rotation.set(0,b.rot,0);d.updateMatrix();this._buildings.setMatrixAt(i,d.matrix);});this._buildings.instanceMatrix.needsUpdate=true;}

@@ -92,23 +92,22 @@ img,svg{display:block;}
 #intro-titles{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;display:flex;align-items:center;justify-content:center;transition:opacity .6s ease;}
 #intro-titles.on{opacity:1;}
 #intro-titles.gone{opacity:0;visibility:hidden;}
-/* the converging line forms a ring → becomes a B → BRIDGENT (holds ~3s) */
+/* the lines collide at the centre → it flashes into a B → BRIDGENT (holds ~3s) */
 .sig{width:min(66vw,720px);height:auto;overflow:visible;}
-.sig-ring{fill:none;stroke:var(--accent);stroke-width:2.6;stroke-linecap:round;stroke-dasharray:390;stroke-dashoffset:390;opacity:0;transform-box:fill-box;transform-origin:center;filter:drop-shadow(0 0 6px rgba(24,208,224,0.6));}
-.sig-b{font-family:var(--disp);font-weight:800;font-size:150px;fill:var(--accent-deep);opacity:0;transform-box:fill-box;transform-origin:center;}
+.sig-b{font-family:var(--disp);font-weight:800;font-size:158px;fill:var(--accent-deep);opacity:0;transform-box:fill-box;transform-origin:center;filter:drop-shadow(0 0 14px rgba(24,208,224,0.85));}
 .sig-word{font-family:var(--disp);font-weight:700;font-stretch:112%;font-size:118px;letter-spacing:1px;fill:rgba(18,38,52,0.95);opacity:0;transform-box:fill-box;transform-origin:center;}
 .sig-sub{font-family:var(--mono);font-size:15px;letter-spacing:8px;fill:var(--accent-deep);text-transform:uppercase;opacity:0;}
-#intro-titles.on .sig-ring{animation:ringDraw 1.0s ease .15s forwards, ringOut .55s ease 1.5s forwards;}
-#intro-titles.on .sig-b{animation:bIn .8s cubic-bezier(.2,.8,.2,1) 1.2s forwards, bOut .5s ease 2.4s forwards;}
-#intro-titles.on .sig-word{animation:wordIn 1.0s cubic-bezier(.2,.8,.2,1) 2.4s forwards;}
-#intro-titles.on .sig-sub{animation:wordIn .9s ease 3.0s forwards;}
-@keyframes ringDraw{0%{stroke-dashoffset:390;opacity:1}100%{stroke-dashoffset:0;opacity:1}}
-@keyframes ringOut{to{opacity:0;transform:scale(1.4)}}
-@keyframes bIn{from{opacity:0;transform:scale(.35)}to{opacity:1;transform:scale(1)}}
-@keyframes bOut{to{opacity:0;transform:scale(1.06)}}
+/* the B bursts out of the collision flash, holds, then hands to the full word */
+#intro-titles.on .sig-b{animation:bFlash 1.0s cubic-bezier(.15,.9,.2,1) .05s forwards, bOut .55s ease 2.3s forwards;}
+#intro-titles.on .sig-word{animation:wordIn 1.0s cubic-bezier(.2,.8,.2,1) 2.3s forwards;}
+#intro-titles.on .sig-sub{animation:wordIn .9s ease 2.9s forwards;}
+@keyframes bFlash{0%{opacity:0;transform:scale(.1);filter:drop-shadow(0 0 40px rgba(24,208,224,1))}
+  45%{opacity:1;transform:scale(1.22);filter:drop-shadow(0 0 30px rgba(24,208,224,1))}
+  100%{opacity:1;transform:scale(1);filter:drop-shadow(0 0 12px rgba(24,208,224,0.7))}}
+@keyframes bOut{to{opacity:0;transform:scale(1.08)}}
 @keyframes wordIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
 @media (prefers-reduced-motion: reduce){
-  .sig-ring{opacity:0;}.sig-b{opacity:0;}.sig-word{opacity:1;}.sig-sub{opacity:1;}
+  .sig-b{opacity:0;}.sig-word{opacity:1;}.sig-sub{opacity:1;}
 }
 .skip-intro{
   position:fixed;right:26px;bottom:24px;z-index:61;pointer-events:auto;

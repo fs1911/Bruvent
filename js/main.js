@@ -123,15 +123,14 @@ function playIntro() {
 
   // Re-balanced dramaturgy: get the bridge built quickly, then give the
   // city / network / flythrough real room to breathe.
-  tl.to(proxy, { p: 0.40, duration: 8.0, ease: 'power2.out', onUpdate: set })   // structure builds — slow, readable
-    .to(proxy, { p: 0.50, duration: 4.2, ease: 'none', onUpdate: set })         // stay cables strung ONE BY ONE
-    .to(proxy, { p: 0.54, duration: 0.9, ease: 'sine.inOut', onUpdate: set })   // completed-bridge beat
-    .to(proxy, { p: 0.70, duration: 4.8, ease: 'none', onUpdate: set })         // camera travels back→front through the bridge
-    .to(proxy, { p: 0.92, duration: 7.6, ease: 'none', onUpdate: set })         // clean lift + the line snakes through the streets
-    .to(proxy, { p: 1.00, duration: 4.2, ease: 'power1.inOut', onUpdate: set }); // descend; line flows out into the wordmark
+  tl.to(proxy, { p: 0.46, duration: 10.5, ease: 'sine.inOut', onUpdate: set })  // ONE continuous, slow, fluid build (parts + cables interleave)
+    .to(proxy, { p: 0.58, duration: 3.4, ease: 'none', onUpdate: set })         // road extends, city rises, camera climbs
+    .to(proxy, { p: 0.72, duration: 4.4, ease: 'none', onUpdate: set })         // camera crosses the bridge over the water
+    .to(proxy, { p: 0.92, duration: 7.0, ease: 'none', onUpdate: set })         // clean lift; lines converge inward through the étoile
+    .to(proxy, { p: 1.00, duration: 3.8, ease: 'power2.out', onUpdate: set });  // centre flares; the wordmark appears
 
-  // title cards fade in over the flythrough → hero lock
-  tl.add(() => { if (titles) titles.classList.add('on'); }, tl.duration() - 3.4);
+  // the wordmark draws as the centre flares near the end
+  tl.add(() => { if (titles) titles.classList.add('on'); }, tl.duration() - 2.7);
 }
 
 /* ============================================================

@@ -123,12 +123,12 @@ function playIntro() {
 
   // Re-balanced dramaturgy: get the bridge built quickly, then give the
   // city / network / flythrough real room to breathe.
-  tl.to(proxy, { p: 0.42, duration: 6.2, ease: 'power2.out', onUpdate: set })   // mechanical build (readable, not rushed)
-    .to(proxy, { p: 0.50, duration: 1.4, ease: 'sine.inOut', onUpdate: set })   // completed-bridge beat
-    .to(proxy, { p: 0.62, duration: 3.2, ease: 'none', onUpdate: set })         // road extends, city rises, camera climbs to bird's-eye
-    .to(proxy, { p: 0.78, duration: 5.0, ease: 'none', onUpdate: set })         // blue line runs from the bridge through the streets
-    .to(proxy, { p: 0.90, duration: 3.2, ease: 'none', onUpdate: set })         // network completes across the city
-    .to(proxy, { p: 1.00, duration: 4.6, ease: 'power1.inOut', onUpdate: set }); // descend → hero lock
+  tl.to(proxy, { p: 0.40, duration: 8.0, ease: 'power2.out', onUpdate: set })   // structure builds — slow, readable
+    .to(proxy, { p: 0.50, duration: 4.2, ease: 'none', onUpdate: set })         // stay cables strung ONE BY ONE
+    .to(proxy, { p: 0.54, duration: 0.9, ease: 'sine.inOut', onUpdate: set })   // completed-bridge beat
+    .to(proxy, { p: 0.70, duration: 4.8, ease: 'none', onUpdate: set })         // camera travels back→front through the bridge
+    .to(proxy, { p: 0.92, duration: 7.6, ease: 'none', onUpdate: set })         // clean lift + the line snakes through the streets
+    .to(proxy, { p: 1.00, duration: 4.2, ease: 'power1.inOut', onUpdate: set }); // descend; line flows out into the wordmark
 
   // title cards fade in over the flythrough → hero lock
   tl.add(() => { if (titles) titles.classList.add('on'); }, tl.duration() - 3.4);

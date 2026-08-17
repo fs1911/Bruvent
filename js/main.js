@@ -255,6 +255,8 @@ function setupUI() {
       e.preventDefault();
       if (!form.reportValidity()) return;
       const data = new FormData(form);
+      // honeypot: real users never fill this — silently accept & drop
+      if (data.get('website')) { showSuccess(); return; }
       const endpoint = form.getAttribute('data-endpoint');
       if (endpoint) {
         fetch(endpoint, { method: 'POST', body: data, headers: { Accept: 'application/json' } })

@@ -32,13 +32,25 @@ dependency, so the experience is self-contained and deploys anywhere static.
 
 ```
 index.html            DOM shell — fully readable content (progressive enhancement)
-css/style.css         Art direction, layout, responsive + reduced-motion rules
+impressum.html        Impressum (legal notice)
+datenschutz.html      Datenschutzerklärung (privacy policy)
+404.html              Custom not-found page
+css/
+  style.css           Art direction, layout, responsive + reduced-motion rules
+  fonts.css           Self-hosted @font-face declarations (no Google Fonts)
 js/
   main.js             Bootstrap: preloader → experience → intro timeline →
                       Lenis + ScrollTrigger → UI (nav, form). Fallbacks.
+  boot-extra.js       Inline-free boot helpers + clickjacking frame-buster
   experience.js       The Three.js scene as a shot system (default export class)
   vendor/             three.module.min.js, gsap.min.js, ScrollTrigger.min.js, lenis.min.js
-assets/favicon.svg    Bridge/network brand mark
+assets/
+  favicon.svg         Bridge/network brand mark
+  fonts/              Self-hosted woff2 (Archivo variable, IBM Plex Sans/Mono)
+SECURITY.md           Vulnerability disclosure policy
+.well-known/security.txt   RFC 9116 security contact
+robots.txt · sitemap.xml · CNAME (bruvent.com) · .nojekyll
+docs/security-audit.md     Hardening + automated pen-test results
 ```
 
 ## The one idea that makes it tractable: `progress`
@@ -105,6 +117,24 @@ python3 -m http.server 8099
 
 ## Content / art direction
 
-Ported from the BRUVENT Claude Design project: midnight-navy / graphite base
-with a single controlled cyan accent (`#4CE3E0`), Archivo display + IBM Plex
-Sans/Mono. German (Swiss) copy, B2B tone.
+Light, architectural daylight: off-white / concrete / brushed-steel base with a
+single controlled teal-cyan accent (`#0E9CA8`), Archivo (variable) display + IBM
+Plex Sans/Mono. German (Swiss) copy, B2B tone.
+
+## Security
+
+The site is hardened for a static, first-party-only threat model:
+
+- **Strict Content-Security-Policy** (`default-src 'self'`) with **no
+  `unsafe-inline`** — inline scripts live in `boot-extra.js`, inline styles are
+  CSS classes. GSAP/Three animate via the CSSOM, which CSP permits.
+- **First-party only**: self-hosted fonts, no CDN, no analytics, no cookies.
+- **SRI** on all vendored libraries; `referrer: no-referrer`;
+  `rel="noopener noreferrer"` on external links; clickjacking frame-buster;
+  honeypot on the contact form (which uses `mailto:` — no data leaves the client).
+
+An automated Playwright audit verifies **0 external requests, 0 CSP violations,
+0 JS errors** on every page while the WebGL scene still runs. See
+[`docs/security-audit.md`](./docs/security-audit.md) and [`SECURITY.md`](./SECURITY.md).
+Header-based controls (HSTS, `X-Content-Type-Options`, `frame-ancestors`) require
+a CDN/proxy in front of the custom domain — GitHub Pages cannot set them.

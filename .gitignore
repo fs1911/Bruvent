@@ -5,6 +5,7 @@ package-lock.json
 
 # local verification scratch
 scratch_test.mjs
+scratch_*.mjs
 scratch_shots/
 
 # os / editor

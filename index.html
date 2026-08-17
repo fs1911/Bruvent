@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
 <title>BRUVENT — Wo Struktur auf Intelligenz trifft</title>
 <meta name="description" content="BRUVENT baut Brücken zwischen Managementsystemen und künstlicher Intelligenz — Beratung für Qualität, Umwelt, Sicherheit und digitale Transformation, mit Lösungen, die schwerpunktmässig mit KI entstehen.">
 <meta name="theme-color" content="#EDF1F5">
@@ -10,9 +12,9 @@
 <meta property="og:title" content="BRUVENT — Wo Struktur auf Intelligenz trifft">
 <meta property="og:description" content="Brücken zwischen Managementsystemen und künstlicher Intelligenz. Schweizer Beratung für Qualität, Umwelt, Sicherheit und KI.">
 <meta property="og:type" content="website">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="./assets/fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./assets/fonts/plex-sans-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="./css/fonts.css">
 <link rel="stylesheet" href="./css/style.css">
 </head>
 <body class="is-loading">
@@ -210,15 +212,15 @@
             <!-- flowing data pulses across the connection -->
             <g class="prozess__flow" fill="#18d0e0">
               <circle class="pflow" cx="120" cy="164" r="4.2"/>
-              <circle class="pflow" cx="120" cy="164" r="4.2" style="animation-delay:.9s"/>
-              <circle class="pflow" cx="120" cy="164" r="4.2" style="animation-delay:1.8s"/>
-              <circle class="pflow" cx="120" cy="164" r="4.2" style="animation-delay:2.7s"/>
+              <circle class="pflow pflow--2" cx="120" cy="164" r="4.2"/>
+              <circle class="pflow pflow--3" cx="120" cy="164" r="4.2"/>
+              <circle class="pflow pflow--4" cx="120" cy="164" r="4.2"/>
             </g>
             <!-- journey nodes on the deck (aligned with the three steps) -->
             <g>
               <circle class="pnode" cx="200" cy="170" r="7" fill="#0e7c82"/>
-              <circle class="pnode" cx="600" cy="170" r="7" fill="#0e7c82" style="animation-delay:.5s"/>
-              <circle class="pnode" cx="1000" cy="170" r="7" fill="#0e7c82" style="animation-delay:1s"/>
+              <circle class="pnode pnode--2" cx="600" cy="170" r="7" fill="#0e7c82"/>
+              <circle class="pnode pnode--3" cx="1000" cy="170" r="7" fill="#0e7c82"/>
             </g>
           </svg>
         </div>
@@ -445,16 +447,18 @@
         </div>
       </div>
       <div class="kontakt__card" data-reveal>
-        <div class="form-sent" id="formSent" style="display:none">
+        <div class="form-sent" id="formSent">
           <div class="form-sent__check">✓</div>
           <h3>Danke — Brücke im Bau.</h3>
           <p>Wir melden uns innert zwei Arbeitstagen bei Ihnen.</p>
         </div>
         <form class="form" id="contactForm" novalidate data-endpoint="" data-mailto="hallo@bruvent.com">
-          <div class="field"><label for="f-name">Name</label><input id="f-name" name="name" required></div>
-          <div class="field"><label for="f-mail">E-Mail</label><input id="f-mail" name="email" type="email" required></div>
-          <div class="field"><label for="f-comp">Unternehmen</label><input id="f-comp" name="company"></div>
-          <div class="field"><label for="f-msg">Worum geht es?</label><textarea id="f-msg" name="message" rows="3"></textarea></div>
+          <div class="field"><label for="f-name">Name</label><input id="f-name" name="name" autocomplete="name" maxlength="120" required></div>
+          <div class="field"><label for="f-mail">E-Mail</label><input id="f-mail" name="email" type="email" autocomplete="email" inputmode="email" maxlength="180" required></div>
+          <div class="field"><label for="f-comp">Unternehmen</label><input id="f-comp" name="company" autocomplete="organization" maxlength="120"></div>
+          <div class="field"><label for="f-msg">Worum geht es?</label><textarea id="f-msg" name="message" rows="3" maxlength="2000"></textarea></div>
+          <!-- honeypot: hidden from humans; if filled, the submission is treated as spam -->
+          <div class="hp" aria-hidden="true"><label for="f-website">Website (bitte leer lassen)</label><input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
           <button type="submit" class="form__submit">Erstgespräch anfragen →</button>
         </form>
       </div>
@@ -475,28 +479,13 @@
     </div>
   </footer>
 
-  <!-- vendored libraries (UMD globals) -->
-  <script src="./js/vendor/gsap.min.js"></script>
-  <script src="./js/vendor/ScrollTrigger.min.js"></script>
-  <script src="./js/vendor/lenis.min.js"></script>
-  <script>window.gsap && window.ScrollTrigger && window.gsap.registerPlugin(window.ScrollTrigger);</script>
+  <!-- vendored libraries (UMD globals) — pinned with Subresource Integrity -->
+  <script src="./js/vendor/gsap.min.js" integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt"></script>
+  <script src="./js/vendor/ScrollTrigger.min.js" integrity="sha384-Z3REaz79l2IaAZqJsSABtTbhjgOUYyV3p90XNnAPCSHg3EMTz1fouunq9WZRtj3d"></script>
+  <script src="./js/vendor/lenis.min.js" integrity="sha384-O55L/6rhHr9CFvrxqv5luxOCcmVaBmETbZbJDP+Do8T0pztTACsFBD/IXCNkj7DV"></script>
+  <!-- boot helpers + watchdog (external so no inline scripts are needed) -->
+  <script src="./js/boot-extra.js"></script>
   <!-- app (ES module; imports Three.js) -->
   <script type="module" src="./js/main.js"></script>
-  <!-- watchdog: if the module or Three.js fails to load, still reveal the site -->
-  <script>
-    window.__bruventBooted = false;
-    setTimeout(function () {
-      if (window.__bruventBooted) return;
-      document.body.classList.add('no-webgl');
-      document.documentElement.classList.remove('no-js');
-      var pre = document.getElementById('preloader');
-      if (pre) { pre.classList.add('hidden'); }
-      document.body.classList.remove('is-loading');
-      var t = document.getElementById('intro-titles'); if (t) t.style.display = 'none';
-      var s = document.querySelector('.skip-intro'); if (s) s.classList.add('gone');
-      document.querySelectorAll('.nav').forEach(function (n) { n.style.transform = 'none'; });
-      document.querySelectorAll('.reveal').forEach(function (r) { r.style.opacity = 1; r.style.transform = 'none'; });
-    }, 6000);
-  </script>
 </body>
 </html>

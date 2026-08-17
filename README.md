@@ -1,6 +1,6 @@
-# BRIDGENT — Cinematic Brand Experience
+# BRUVENT — Cinematic Brand Experience
 
-A cinematic, single-page brand experience for **BRIDGENT** — a Swiss consultancy
+A cinematic, single-page brand experience for **BRUVENT** — a Swiss consultancy
 that *builds bridges between real-world management systems and artificial
 intelligence* (quality, environment, safety, integrated management systems,
 digitalisation & AI).
@@ -105,6 +105,6 @@ python3 -m http.server 8099
 
 ## Content / art direction
 
-Ported from the BRIDGENT Claude Design project: midnight-navy / graphite base
+Ported from the BRUVENT Claude Design project: midnight-navy / graphite base
 with a single controlled cyan accent (`#4CE3E0`), Archivo display + IBM Plex
 Sans/Mono. German (Swiss) copy, B2B tone.

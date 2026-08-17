@@ -1,5 +1,5 @@
 /* ============================================================
-   BRIDGENT — bootstrap
+   BRUVENT — bootstrap
    Orchestrates: preloader → 3D experience → cinematic intro
    timeline → Lenis smooth scroll + ScrollTrigger → UI.
 
@@ -78,7 +78,7 @@ function startExperience() {
   try {
     state.exp = new Experience(container, { tier: detectTier(), reducedMotion: REDUCED });
   } catch (err) {
-    console.error('[bridgent] WebGL init failed, using fallback:', err);
+    console.error('[bruvent] WebGL init failed, using fallback:', err);
     document.body.classList.add('no-webgl');
     revealHeroInstant();
     setupScroll(true);
@@ -128,8 +128,8 @@ function playIntro() {
     .to(proxy, { p: 0.72, duration: 4.2, ease: 'none', onUpdate: set })         // camera crosses the bridge over the water
     .to(proxy, { p: 0.90, duration: 6.6, ease: 'none', onUpdate: set })         // clean lift; lines converge inward through the étoile
     .to(proxy, { p: 1.00, duration: 3.2, ease: 'power2.out', onUpdate: set })   // centre flares big and fully lights
-    .add(() => { if (titles) titles.classList.add('on'); })                     // ring → B → BRIDGENT begins
-    .to({}, { duration: 6.4 });                                                 // BRIDGENT holds ~3s before the site takes over
+    .add(() => { if (titles) titles.classList.add('on'); })                     // ring → B → BRUVENT begins
+    .to({}, { duration: 6.4 });                                                 // BRUVENT holds ~3s before the site takes over
 }
 
 /* ============================================================
@@ -238,15 +238,41 @@ function setupUI() {
     });
   });
 
-  // contact form → success state (no backend; front-end demo)
+  // contact form.
+  // Works on static hosting: if the form has a data-endpoint (e.g. a
+  // Formspree URL) we POST to it; otherwise we fall back to a mailto:
+  // that opens the visitor's mail client pre-filled. Either way we show
+  // the polished success state.
   const form = document.getElementById('contactForm');
   const sent = document.getElementById('formSent');
   if (form && sent) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+    const showSuccess = () => {
       form.style.display = 'none';
       sent.style.display = 'flex';
       gsap.fromTo(sent, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
+    };
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      const data = new FormData(form);
+      const endpoint = form.getAttribute('data-endpoint');
+      if (endpoint) {
+        fetch(endpoint, { method: 'POST', body: data, headers: { Accept: 'application/json' } })
+          .then(showSuccess)
+          .catch(showSuccess);
+        return;
+      }
+      // mailto fallback — no backend required
+      const to = form.getAttribute('data-mailto') || 'hallo@bruvent.com';
+      const subject = `Erstgespräch-Anfrage — ${data.get('name') || ''}`.trim();
+      const body =
+        `Name: ${data.get('name') || ''}\n` +
+        `E-Mail: ${data.get('email') || ''}\n` +
+        `Unternehmen: ${data.get('company') || ''}\n\n` +
+        `${data.get('message') || ''}`;
+      window.location.href =
+        `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      showSuccess();
     });
   }
 }
@@ -255,7 +281,7 @@ function setupUI() {
    BOOT
    ============================================================ */
 async function boot() {
-  window.__bridgentBooted = true;
+  window.__bruventBooted = true;
   document.body.classList.add('is-loading');
   setupUI();
   await fakeLoad();

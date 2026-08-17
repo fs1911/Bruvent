@@ -1,5 +1,5 @@
 /* ============================================================
-   BRIDGENT — 3D Experience (light / architectural daylight)
+   BRUVENT — 3D Experience (light / architectural daylight)
 
    progress ∈ [0 .. 1.12]
      0.00–0.46  bridge assembles — slow, fully continuous (parts &
@@ -223,7 +223,7 @@ export default class Experience {
     {p:0.73,pos:[0,52,-120],look:[0,3,-234]},    // exit + rising toward the city
     {p:0.83,pos:[0,170,-210],look:[0,0,-241]},   // rising to top-down, étoile reads
     {p:0.91,pos:[0,235,-240],look:[0,0,-240]},   // TRUE top-down, centred on the core
-    {p:1.00,pos:[0,242,-240],look:[0,0,-240]},   // hold top-down for collision → B → BRIDGENT
+    {p:1.00,pos:[0,242,-240],look:[0,0,-240]},   // hold top-down for collision → B → BRUVENT
     {p:1.12,pos:[0,248,-240],look:[0,0,-240]},   // scroll tail
   ];}
   _applyCamera(p){const shots=this._shots;let i=0;while(i<shots.length-1&&p>shots[i+1].p)i++;const a=shots[i],b=shots[Math.min(i+1,shots.length-1)];const t=smooth((p-a.p)/((b.p-a.p)||1));const L=(u,v2)=>u+(v2-u)*t;let px=L(a.pos[0],b.pos[0]),py=L(a.pos[1],b.pos[1]),pz=L(a.pos[2],b.pos[2]);let lx=L(a.look[0],b.look[0]),ly=L(a.look[1],b.look[1]),lz=L(a.look[2],b.look[2]);if(p>=0.985&&!this.reducedMotion){const s=smooth((p-0.985)/0.015);px+=Math.sin(this.time*0.3)*1.2*s;py+=Math.cos(this.time*0.24)*0.6*s;}this.camera.position.set(px,py,pz);this.camera.lookAt(lx,ly,lz);}

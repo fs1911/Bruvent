@@ -1,0 +1,15 @@
+{
+  "name": "BRUVENT",
+  "short_name": "BRUVENT",
+  "description": "Brücken zwischen Managementsystemen und künstlicher Intelligenz — Schweizer Beratung für Qualität, Umwelt, Sicherheit und KI.",
+  "lang": "de-CH",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#EDF1F5",
+  "theme_color": "#EDF1F5",
+  "icons": [
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

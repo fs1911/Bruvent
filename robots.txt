@@ -1,0 +1,6 @@
+# BRUVENT — https://bruvent.com
+User-agent: *
+Allow: /
+Disallow: /node_modules/
+
+Sitemap: https://bruvent.com/sitemap.xml

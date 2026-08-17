@@ -1,0 +1,5 @@
+# BRUVENT security contact — RFC 9116
+Contact: mailto:hallo@bruvent.com
+Expires: 2027-08-17T00:00:00.000Z
+Preferred-Languages: de, en
+Canonical: https://bruvent.com/.well-known/security.txt

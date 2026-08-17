@@ -1,0 +1,23 @@
+# Cloudflare Pages headers file.
+# Consumed automatically when the site is hosted on Cloudflare Pages.
+# (Ignored by GitHub Pages — harmless to keep in the repo.)
+# These are the real HTTP response headers that a static host cannot set
+# via <meta>. They supersede/extend the in-page <meta> CSP — notably they
+# add frame-ancestors, HSTS, X-Content-Type-Options and Permissions-Policy.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Permissions-Policy: accelerometer=(), autoplay=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), magnetometer=(), microphone=(), midi=(), payment=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), xr-spatial-tracking=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  X-Permitted-Cross-Domain-Policies: none
+
+# Long-lived caching for fingerprint-stable static assets
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+/js/vendor/*
+  Cache-Control: public, max-age=31536000, immutable

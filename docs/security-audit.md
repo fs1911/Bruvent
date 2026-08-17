@@ -70,19 +70,22 @@ Additional checks:
 
 ## Residual items (require infrastructure outside GitHub Pages)
 
-GitHub Pages cannot emit arbitrary HTTP response headers. The following are the
-`<meta>`-expressible controls' header counterparts and should be added by placing
-a CDN/proxy (e.g. Cloudflare) in front of `bruvent.com`:
+GitHub Pages cannot emit arbitrary HTTP response headers. These header-based
+controls are **prepared and ready to deploy** via Cloudflare — see
+[`../cloudflare/SETUP.md`](../cloudflare/SETUP.md) (three paths: Cloudflare Pages
+`_headers`, Transform Rules, or a Worker). They add:
 
-- `Strict-Transport-Security` (HSTS with preload)
+- `Strict-Transport-Security` (HSTS, includeSubDomains, preload)
 - `X-Content-Type-Options: nosniff`
-- `Permissions-Policy` (e.g. disable camera/microphone/geolocation)
-- `Content-Security-Policy` **header** with `frame-ancestors 'none'`
-  (the meta form ignores `frame-ancestors`; the JS frame-buster covers this in
-  the meantime)
+- `X-Frame-Options: DENY` + CSP `frame-ancestors 'none'` (the `<meta>` form
+  ignores `frame-ancestors`; the JS frame-buster covers it until the header ships)
+- `Permissions-Policy` (all powerful features denied)
+- `Cross-Origin-Opener-Policy` / `-Resource-Policy`, `X-Permitted-Cross-Domain-Policies`
 
-After DNS is pointed at the custom domain, verify externally with
-<https://securityheaders.com> and <https://observatory.mozilla.org>.
+The exact header values live in [`../_headers`](../_headers) and
+[`../cloudflare/worker.js`](../cloudflare/worker.js). After DNS is pointed at the
+custom domain, verify externally with <https://securityheaders.com> and
+<https://observatory.mozilla.org> (target A/A+).
 
 ## Reproduce
 
